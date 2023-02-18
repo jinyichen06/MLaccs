@@ -1,8 +1,22 @@
+#' Get Tiles for the scoring Process
+#'
+#' @param ScoreFile input data.frame with scores
+#' @param ScoredVariable the names of score variable
+#' @param BestTile1 specify which tile corresponding to high scores
+#' @param TileNum numbers of tiles
+#'
+#' @importFrom dplyr left_join
+#' @importFrom data.table data.table setDT :=
+#' @importFrom stats quantile
+#' @return a data.frame with bins
+#' @export getTile
+#'
+
 getTile=function(ScoreFile,ScoredVariable,BestTile1=FALSE,TileNum=10){
   #ScoreFile is a data frame created in Scoring function.
 
   ### convert to data.table
-  setDT(ScoreFile)
+  data.table::setDT(ScoreFile)
 
   if(!(BestTile1 %in% c(TRUE,FALSE))){
     stop("The BestTile1 can only be a logical indicating whether the tile 1 corresponds to the highest Scores", call. = FALSE)
@@ -13,7 +27,7 @@ getTile=function(ScoreFile,ScoredVariable,BestTile1=FALSE,TileNum=10){
 
   #-------------------------------------- create Bins and Tiles -----------------------------------------------------------------------------------------------
   bins <- TileNum
-  q <- quantile(ScoreFile[[ScoredVariable]], probs=c(0:(bins)/bins), na.rm=TRUE, type=3)
+  q <- stats::quantile(ScoreFile[[ScoredVariable]], probs=c(0:(bins)/bins), na.rm=TRUE, type=3)
   cuts <- unique(q)
   cuts_Len <- length(cuts)
 
@@ -22,7 +36,7 @@ getTile=function(ScoreFile,ScoredVariable,BestTile1=FALSE,TileNum=10){
   }
 
   while (cuts_Len < TileNum+1) {
-    q <- quantile(ScoreFile[[ScoredVariable]], probs=c(0:(bins)/bins), na.rm=TRUE, type=3)
+    q <- stats::quantile(ScoreFile[[ScoredVariable]], probs=c(0:(bins)/bins), na.rm=TRUE, type=3)
     cuts <- unique(q)
     cuts_Len <- length(cuts)
     bins <- bins + 1
@@ -42,12 +56,12 @@ getTile=function(ScoreFile,ScoredVariable,BestTile1=FALSE,TileNum=10){
   Tile_Unique_df <- data.frame(Tile=Tile_Unique,Tile_rev=rev(Tile_Unique))
 
   if(BestTile1){
-    Tile_df <- data.table(Tile=Tile)
-    Tile_df <- left_join(Tile_df,Tile_Unique_df,by="Tile")
+    Tile_df <- data.table::data.table(Tile=Tile)
+    Tile_df <- dplyr::left_join(Tile_df,Tile_Unique_df,by="Tile")
     Tile <- Tile_df[["Tile_rev"]]
   }
 
   #-------------------------------------- add Bins and Tiles to the ScoreFile --------------------------------------------------------------------------
-  ScoreFile[,c("Score_bin","Tile"):=list(Score_bin, Tile)]
+  ScoreFile[,c("Score_bin","Tile") := list(Score_bin, Tile)]
   return(ScoreFile)
 }# end of function getTile

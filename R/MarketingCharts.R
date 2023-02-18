@@ -1,6 +1,15 @@
+#' Marketing Gains Charts
+#'
+#' @param pred a vector of the probability of the positive class (response).
+#' @param test a vector of the real observation.
+#' @param type a string of CumulativeGain","Gain","Lift"
+#' @param NBin a number of bins
+#'
+#' @return a data.frame of gains charts
+#' @export
+#'
+
 MarketingCharts=function(pred,test,type,NBin=10){
-  # pred is the probabilyty of the predict value belongs to positive class (response).
-  # test is the real observation.
   type0=c("CumulativeGain","Gain","Lift")
   ## Define some messages if they are NULL
   messages <- c('ERROR: The length of pred and test are different',
@@ -27,7 +36,7 @@ MarketingCharts=function(pred,test,type,NBin=10){
   lift=NULL
   Tile=NULL
   N_rows<-length(pred)
-  customerN=round(quantile(0:N_rows,probs = seq(0,1,1/NBin)))
+  customerN=round(stats::quantile(0:N_rows,probs = seq(0,1,1/NBin)))
   total1=summary(test)[2]
   for(i in 1:length(customerN) ){
     if (customerN[i]==0){
